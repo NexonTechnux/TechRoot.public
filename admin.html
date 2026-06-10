@@ -16,7 +16,7 @@
 
 <div class="box" id="login-box">
   <h2 style="color: #00ff99;">Accesso Admin TechRoot 🔐</h2>
-  <p style="font-size: 12px; opacity: 0.6;">Protetto con crittografia SHA-256</p>
+  <p style="font-size: 12px; opacity: 0.6;">Codice offuscato anti-ispezione</p>
   <input type="text" id="username" placeholder="Username">
   <input type="password" id="password" placeholder="Password">
   <button onclick="checkLogin()">Accedi</button>
@@ -36,28 +36,21 @@
 </div>
 
 <script>
-  // Funzione asincrona per calcolare l'hash SHA-256 della password inserita
-  async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);                    
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  // Configurazione Admin
+  // Username in chiaro
   const ADMIN_USER = "NexonTech";
-  // Questo è l'hash di "Root2026!". Chi ispeziona la pagina vedrà solo questo codice inutile!
-  const HASHED_PASS = "ba57bb85b306b3e7bc8c7d812eb121ff1dc43a758782a20a3203fcf151db1587";
+  
+  // PASSWORD OFFUSCATA: Chi fa "Ispeziona" vedrà solo questa stringa strana!
+  // Questa stringa è il codice Base64 di "Root2026!"
+  const OBSCURED_PASS = "Um9vdDIwMjYh";
 
-  async function checkLogin() {
+  function checkLogin() {
     const u = document.getElementById("username").value;
     const p = document.getElementById("password").value;
     
-    // Calcoliamo l'hash della password digitata dall'utente
-    const inputHash = await sha256(p);
+    // Decodifichiamo la stringa nascosta al volo per fare il controllo
+    const decryptedPass = atob(OBSCURED_PASS);
     
-    // Confrontiamo l'username e l'hash generato con quello memorizzato
-    if(u === ADMIN_USER && inputHash === HASHED_PASS) {
+    if(u === ADMIN_USER && p === decryptedPass) {
       document.getElementById("login-box").classList.add("hidden");
       document.getElementById("admin-box").classList.remove("hidden");
     } else {
