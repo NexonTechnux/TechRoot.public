@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>TechRoot - Admin Panel Protetto</title>
+  <style>
+    body { background: #0f0f14; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .box { background: #151521; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; }
+    input, textarea, button { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: none; box-sizing: border-box; }
+    input, textarea { background: #1b1b28; color: white; }
+    button { background: #00ff99; color: black; font-weight: bold; cursor: pointer; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="box" id="login-box">
+  <h2 style="color: #00ff99;">Accesso Admin TechRoot 🔐</h2>
+  <p style="font-size: 12px; opacity: 0.6;">Protetto con crittografia SHA-256</p>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="checkLogin()">Accedi</button>
+  <p id="error" style="color: #ff0055; font-size: 14px; margin-top: 10px;"></p>
+</div>
+
+<div class="box hidden" id="admin-box">
+  <h2 style="color: #00ff99;">Aggiungi Articolo</h2>
+  <input type="text" id="prod-title" placeholder="Nome del dispositivo (es. TCL 30 SE)">
+  <input type="number" id="prod-price" placeholder="Prezzo (€)">
+  <textarea id="prod-desc" placeholder="Specifiche tecniche / Stato del telefono" rows="3"></textarea>
+  <input type="text" id="prod-img" placeholder="Link URL Immagine (opzionale)">
+  <button onclick="addProduct()">Pubblica con 1 Click 🚀</button>
+  <button onclick="clearDatabase()" style="background: #ff0055; color: white; margin-top: 10px;">Svuota Negozio</button>
+  <br><br>
+  <a href="index.html" style="color: white; opacity: 0.7; text-decoration: none;">← Torna al Negozio</a>
+</div>
+
+<script>
+  // Funzione asincrona per calcolare l'hash SHA-256 della password inserita
+  async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);                    
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Configurazione Admin
+  const ADMIN_USER = "NexonTech";
+  // Questo è l'hash di "Root2026!". Chi ispeziona la pagina vedrà solo questo codice inutile!
+  const HASHED_PASS = "ba57bb85b306b3e7bc8c7d812eb121ff1dc43a758782a20a3203fcf151db1587";
+
+  async function checkLogin() {
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
+    
+    // Calcoliamo l'hash della password digitata dall'utente
+    const inputHash = await sha256(p);
+    
+    // Confrontiamo l'username e l'hash generato con quello memorizzato
+    if(u === ADMIN_USER && inputHash === HASHED_PASS) {
+      document.getElementById("login-box").classList.add("hidden");
+      document.getElementById("admin-box").classList.remove("hidden");
+    } else {
+      document.getElementById("error").innerText = "Credenziali errate! Accesso negato.";
+    }
+  }
+
+  function addProduct() {
+    const title = document.getElementById("prod-title").value;
+    const price = parseFloat(document.getElementById("prod-price").value);
+    const desc = document.getElementById("prod-desc").value;
+    let img = document.getElementById("prod-img").value;
+
+    if(!title || !price || !desc) {
+      alert("Compila tutti i campi principali!");
+      return;
+    }
+
+    const newProduct = { title, price, desc, img };
+    let products = JSON.parse(localStorage.getItem("techroot_products")) || [];
+    products.push(newProduct);
+    localStorage.setItem("techroot_products", JSON.stringify(products));
+
+    alert("Articolo caricato con successo!");
+    
+    document.getElementById("prod-title").value = "";
+    document.getElementById("prod-price").value = "";
+    document.getElementById("prod-desc").value = "";
+    document.getElementById("prod-img").value = "";
+  }
+
+  function clearDatabase() {
+    if(confirm("Vuoi davvero cancellare tutti i prodotti personalizzati?")) {
+      localStorage.removeItem("techroot_products");
+      alert("Sezione resettata!");
+    }
+  }
+</script>
+</body>
+</html>
