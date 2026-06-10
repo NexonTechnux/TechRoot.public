@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TechRoot</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #0f0f14; color: white; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: #151521; position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 22px; font-weight: bold; color: #00ff99; }
+    nav a { margin-left: 20px; text-decoration: none; color: white; opacity: 0.8; }
+    nav a:hover { opacity: 1; color: #00ff99; }
+    
+    .hero { text-align: center; padding: 60px 20px; background: linear-gradient(135deg, #00ff99, #0066ff); }
+    .hero h1 { font-size: 42px; margin-bottom: 10px; }
+    
+    .section-title { padding: 20px 40px 0 40px; color: #00ff99; font-size: 24px; border-bottom: 1px solid #151521; }
+    .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 40px; }
+    
+    .card { background: #1b1b28; border-radius: 12px; overflow: hidden; transition: transform 0.3s; position: relative; }
+    .card:hover { transform: scale(1.05); }
+    .card img { width: 100%; height: 180px; object-fit: cover; }
+    .card-content { padding: 15px; }
+    .price { color: #00ff99; font-weight: bold; font-size: 18px; }
+    
+    .badge { position: absolute; top: 10px; left: 10px; padding: 5px 10px; font-size: 11px; font-weight: bold; border-radius: 5px; text-transform: uppercase; }
+    .badge-nexon { background: #ff0055; color: white; }
+    .badge-user { background: #0066ff; color: white; }
+    
+    .cart-section { background: #151521; padding: 20px 40px; margin: 20px 40px; border-radius: 12px; }
+    .btn-buy { background: #00ff99; color: black; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+    
+    footer { text-align: center; padding: 20px; background: #151521; font-size: 14px; opacity: 0.7; margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">TechRoot ⚡</div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#approvati">Verificati NexonTech</a>
+    <a href="#elettronica">Elettronica</a>
+    <a href="#carrello">Carrello (<span id="cart-count">0</span>)</a>
+    <a href="admin.html" style="color: #ff9900;">Area Admin</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Benvenuto su TechRoot</h1>
+  <p>Hardware ottimizzato, elettronica e reselling di livello superiore.</p>
+</section>
+
+<!-- SEZIONE 1: APPROVATI DA NEXONTECH -->
+<div class="section-title" id="approvati">Verificati e Approvati da NexonTech 🛡️</div>
+<section class="products">
+  <div class="card">
+    <span class="badge badge-nexon">NexonTech Approved</span>
+    <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9" />
+    <div class="card-content">
+      <h3>Huawei P40 Lite</h3>
+      <p style="font-size:12px; opacity:0.7;">Kirin 810 • HMS Ottimizzati • Come nuovo</p>
+      <p class="price">€90</p>
+      <button class="btn-buy" onclick="addToCart('Huawei P40 Lite', 90)">Aggiungi al carrello</button>
+    </div>
+  </div>
+</section>
+
+<!-- SEZIONE 2: ALTRA ELETTRONICA (DINAMICA) -->
+<div class="section-title" id="elettronica">Sezione Elettronica / Annunci Recenti 📱</div>
+<section class="products" id="dynamic-products">
+  <!-- I prodotti caricati dall'admin compariranno qui in automatico -->
+</section>
+
+<!-- SEZIONE CARRELLO -->
+<section class="cart-section" id="carrello">
+  <h2>Il tuo Carrello 🛒</h2>
+  <ul id="cart-list" style="list-style: none; padding: 0;">
+    <p style="opacity: 0.5;">Il carrello è vuoto.</p>
+  </ul>
+  <h3>Totale: <span id="cart-total" style="color: #00ff99;">€0</span></h3>
+</section>
+
+<footer>
+  © 2026 TechRoot — Creato con logica proprietaria.
+</footer>
+
+<script>
+  // Carrello semplice
+  let cart = [];
+  function addToCart(name, price) {
+    cart.push({name, price});
+    updateCart();
+  }
+  function updateCart() {
+    document.getElementById("cart-count").innerText = cart.length;
+    const list = document.getElementById("cart-list");
+    const totalSpan = document.getElementById("cart-total");
+    if(cart.length === 0) {
+      list.innerHTML = `<p style="opacity:0.5;">Il carrello è vuoto.</p>`;
+      totalSpan.innerText = "€0";
+      return;
+    }
+    list.innerHTML = cart.map(item => `<li style="margin-bottom:10px;">⚡ ${item.name} - <span style="color:#00ff99;">€${item.price}</span></li>`).join('');
+    let total = cart.reduce((sum, item) => sum + item.price, 0);
+    totalSpan.innerText = "€" + total;
+  }
+
+  // Funzione per caricare i prodotti dal "Database" (LocalStorage)
+  function loadProducts() {
+    const products = JSON.parse(localStorage.getItem("techroot_products")) || [];
+    const container = document.getElementById("dynamic-products");
+    
+    if(products.length === 0) {
+      container.innerHTML = `<p style="padding-left:40px; opacity:0.5;">Nessun articolo caricato manualmente al momento.</p>`;
+      return;
+    }
+
+    container.innerHTML = products.map(p => `
+      <div class="card">
+        <span class="badge badge-user">Community Tech</span>
+        <img src="${p.img || 'https://images.unsplash.com/photo-1546054454-aa26e2b734c7'}" />
+        <div class="card-content">
+          <h3>${p.title}</h3>
+          <p style="font-size:12px; opacity:0.7;">${p.desc}</p>
+          <p class="price">€${p.price}</p>
+          <button class="btn-buy" onclick="addToCart('${p.title}', ${p.price})">Aggiungi al carrello</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Carica i prodotti all'avvio della pagina
+  window.onload = loadProducts;
+</script>
+</body>
+</html>
